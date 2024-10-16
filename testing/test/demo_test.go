@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap"
 	testing2 "testing"
+	"time"
 )
 
 type DemoHandlerTest struct {
@@ -14,7 +15,6 @@ type DemoHandlerTest struct {
 }
 
 func (s *DemoHandlerTest) SetupTest() {
-	s.TestSuite.SetupTest()
 }
 func TestDemoTest(t *testing2.T) {
 	suite.Run(t, new(DemoHandlerTest))
@@ -27,7 +27,9 @@ func (s *DemoHandlerTest) TestDemoHandler_ShouldReturnSuccess() {
 			Data: "TestPayload",
 		},
 	}
-	s.Worker.Run()
+
 	zap.L().Info("Event published", zap.Any("event", event))
-	s.Producer.PublishAsync(&event)
+	err := s.Producer.PublishAsync(&event)
+	time.Sleep(10 * time.Second)
+	zap.L().Error("Error", zap.Error(err))
 }

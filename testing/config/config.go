@@ -17,7 +17,7 @@ func SetMockEnv() {
 	os.Setenv("NEWRELIC_ENABLED", "true")
 
 	// ProducerConfigs
-	os.Setenv("BROKERS", "broker1,broker2")
+	os.Setenv("BROKERS", "localhost:29092")
 	os.Setenv("TOPIC", "myTopic")
 	os.Setenv("ENABLE_TLS", "false")
 	os.Setenv("INSECURE_SKIP_VERIFY", "false")
@@ -26,11 +26,11 @@ func SetMockEnv() {
 	os.Setenv("CLIENT_KEY_FILE", "/path/to/client_key")
 
 	// ExternalProducerConfigs
-	os.Setenv("BOOTSTRAP_ADDRESS", "bootstrap1,bootstrap2")
+	os.Setenv("BOOTSTRAP_ADDRESS", "localhost:29092")
 	os.Setenv("SASL_JAAS_USERNAME", "user")
 	os.Setenv("SASL_JAAS_PASSWORD", "password")
 	os.Setenv("SASL_ALGORITHM", "SCRAM-SHA-512")
-	os.Setenv("SECURITY_PROTOCOL", "SASL_SSL")
+	os.Setenv("SECURITY_PROTOCOL", "PLAINTEXT")
 	os.Setenv("INSECURE_SKIP_VERIFY", "false")
 
 	// MnSmsConfigs
@@ -111,7 +111,7 @@ func SetMockEnv() {
 	os.Setenv("MYSQL_MAX_IDLE_CONNECTIONS", "5")
 
 	// PostgreSQLConfigs
-	os.Setenv("POSTGRESQL_DSN", "user:password@tcp(localhost:5432)/dbname")
+	os.Setenv("POSTGRESQL_DSN", "host=localhost port=5432 user=postgres password=postgres dbname=postgres sslmode=disable")
 	os.Setenv("POSTGRESQL_CONN_MAX_LIFE_TIME_SECOND", "0")
 	os.Setenv("POSTGRESQL_ENABLE_DEBUG", "false")
 	os.Setenv("POSTGRESQL_MAX_OPEN_CONNECTIONS", "25")
@@ -130,7 +130,7 @@ func SetMockEnv() {
 
 	// SaramaConsumerConfig
 	os.Setenv("INITIAL_OFFSET", "newest")
-	os.Setenv("ENABLE_TLS", "true")
+	os.Setenv("ENABLE_TLS", "false")
 	os.Setenv("INSECURE_SKIP_VERIFY", "false")
 	os.Setenv("CLIENT_CERT_FILE", "/path/to/client_cert")
 	os.Setenv("CLIENT_KEY_FILE", "/path/to/client_key")

@@ -8,6 +8,7 @@ import (
 	event2 "demo_test_worker/mod/pubsub/event"
 	"demo_test_worker/mod/shutdown"
 	"encoding/json"
+	"fmt"
 	"go.uber.org/zap"
 )
 
@@ -18,6 +19,7 @@ type StatusSynchronizationWorker struct {
 }
 
 func (s StatusSynchronizationConsumer) Handle(message consumer.Message) error {
+	fmt.Print("message", message)
 	var event event2.AbstractEvent
 	err := json.Unmarshal(message.Value, &event)
 	if err != nil {
@@ -62,4 +64,9 @@ func (w StatusSynchronizationWorker) Run() {
 	if err := w.ConsumerGroup.Consume(w.Handler); err != nil {
 		zap.L().Panic("consumer group error", zap.String(constants.ErrorRaw, err.Error()))
 	}
+}
+func (w StatusSynchronizationWorker) Shutdown() {
+	zap.L().Info("shutting down worker")
+	w.ConsumerGroup.Close()
+
 }

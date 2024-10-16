@@ -103,6 +103,23 @@ func (k producer) PublishAsync(e event.Event) error {
 	go func(msg *sarama.ProducerMessage) {
 		k.AsyncProducer.Input() <- msg
 	}(msg)
+	go func() {
+		for {
+			select {
+			case response := <-k.AsyncProducer.Successes():
+				zap.L().Info("Publish message success",
+					zap.String("topic", response.Topic),
+					zap.String("response", fmt.Sprintf("%v", response.Value)),
+					zap.Int32("partition", response.Partition),
+					zap.Int64("offset", response.Offset),
+				)
+			case err = <-k.AsyncProducer.Errors():
+				zap.L().Error("Publish message error",
+					zap.String("topic", k.topic),
+					zap.Error(err))
+			}
+		}
+	}()
 	return nil
 }
 
