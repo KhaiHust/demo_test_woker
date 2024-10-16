@@ -8,8 +8,6 @@ import (
 	"github.com/kelseyhightower/envconfig"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap"
-	"os"
-	"os/signal"
 )
 
 type TestSuite struct {
@@ -43,9 +41,6 @@ func (s *TestSuite) SetupSuite() {
 		if s.Worker != nil {
 			serverReady <- true
 		}
-		quit := make(chan os.Signal)
-		signal.Notify(quit, os.Interrupt)
-		<-quit
 	}()
 	<-serverReady
 	zap.L().Info("Test App is initialized")
