@@ -8,18 +8,16 @@ import (
 	event2 "demo_test_worker/mod/pubsub/event"
 	"demo_test_worker/mod/shutdown"
 	"encoding/json"
-	"fmt"
 	"go.uber.org/zap"
 )
 
-type StatusSynchronizationConsumer struct {
+type DemoConsumer struct {
 }
-type StatusSynchronizationWorker struct {
+type DemoWorker struct {
 	pubsub.BaseWorker
 }
 
-func (s StatusSynchronizationConsumer) Handle(message consumer.Message) error {
-	fmt.Print("message", message)
+func (s *DemoConsumer) Handle(message consumer.Message) error {
 	var event event2.AbstractEvent
 	err := json.Unmarshal(message.Value, &event)
 	if err != nil {
@@ -31,11 +29,11 @@ func (s StatusSynchronizationConsumer) Handle(message consumer.Message) error {
 }
 
 func NewStatusSynchronizationConsumer() consumer.MessageHandler {
-	return &StatusSynchronizationConsumer{}
+	return &DemoConsumer{}
 }
-func NewWorker(cfg config.Config) *StatusSynchronizationWorker {
+func NewWorker(cfg config.Config) *DemoWorker {
 	handler := NewStatusSynchronizationConsumer()
-	return &StatusSynchronizationWorker{
+	return &DemoWorker{
 		BaseWorker: pubsub.BaseWorker{
 			Handler: consumer.NewTopicDispatcher(consumer.TopicDispatcherOption{
 				Topic:   cfg.KafkaConfigs.Topic,
@@ -59,13 +57,13 @@ func initConsumerGroup(conf config.Config) *consumer.Group {
 	}
 	return cg
 }
-func (w StatusSynchronizationWorker) Run() {
+func (w *DemoWorker) Run() {
 	shutdown.SigtermHandler().RegisterErrorFunc(w.ConsumerGroup.Close)
 	if err := w.ConsumerGroup.Consume(w.Handler); err != nil {
 		zap.L().Panic("consumer group error", zap.String(constants.ErrorRaw, err.Error()))
 	}
 }
-func (w StatusSynchronizationWorker) Shutdown() {
+func (w *DemoWorker) Shutdown() {
 	zap.L().Info("shutting down worker")
 	w.ConsumerGroup.Close()
 

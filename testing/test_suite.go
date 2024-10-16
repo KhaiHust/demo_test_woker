@@ -12,8 +12,8 @@ import (
 
 type TestSuite struct {
 	suite.Suite
-	Producer pubsub.Producer
-	Worker   *handler.StatusSynchronizationWorker
+	Producer pubsub.IProducer
+	Worker   *handler.DemoWorker
 }
 
 func (s *TestSuite) SetupSuite() {
@@ -21,6 +21,7 @@ func (s *TestSuite) SetupSuite() {
 	logger, _ := zap.NewDevelopment()
 	zap.ReplaceGlobals(logger)
 	zap.L().Info("Test App is initializing")
+
 	config.SetMockEnv()
 	c := config2.Load()
 	c.KafkaConfigs.EnableTLS = false
@@ -34,15 +35,10 @@ func (s *TestSuite) SetupSuite() {
 	}
 	s.Producer = producer
 	newServer := handler.NewWorker(c)
-	serverReady := make(chan bool)
-	go func() {
-		s.Worker = newServer
-		go newServer.Run()
-		if s.Worker != nil {
-			serverReady <- true
-		}
-	}()
-	<-serverReady
+	s.Worker = newServer
+
+	go newServer.Run()
+
 	zap.L().Info("Test App is initialized")
 }
 func (s *TestSuite) TearDownSuite() {

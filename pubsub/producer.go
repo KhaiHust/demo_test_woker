@@ -13,19 +13,16 @@ import (
 	"time"
 )
 
-type Producer interface {
+type IProducer interface {
 	PublishAsync(event event.Event) error
 }
-
-// compiler type check
-var _ Producer = (*producer)(nil)
 
 type producer struct {
 	AsyncProducer sarama.AsyncProducer
 	topic         string
 }
 
-func NewProducer(props config.ProducerConfigs) (Producer, error) {
+func NewProducer(props config.ProducerConfigs) (IProducer, error) {
 	conf, err := BuildSaramaConfig(props)
 	if err != nil {
 		return nil, err
@@ -58,37 +55,7 @@ func NewProducer(props config.ProducerConfigs) (Producer, error) {
 	return service, nil
 }
 
-func NewAsyncProducer(topic string, addr []string, config *sarama.Config) (Producer, error) {
-	asyncProducer, err := sarama.NewAsyncProducer(addr, config)
-	if err != nil {
-		return nil, err
-	}
-	service := &producer{
-		AsyncProducer: asyncProducer,
-		topic:         topic,
-	}
-	go func() {
-		for {
-			select {
-			case response := <-service.AsyncProducer.Successes():
-				zap.L().Info("Publish message success",
-					zap.String("topic", response.Topic),
-					zap.String("response", fmt.Sprintf("%v", response.Value)),
-					zap.Int32("partition", response.Partition),
-					zap.Int64("offset", response.Offset),
-				)
-			case err = <-service.AsyncProducer.Errors():
-				zap.L().Error("Publish message error",
-					zap.String("topic", service.topic),
-					zap.Error(err))
-			}
-		}
-	}()
-
-	return service, nil
-}
-
-func (k producer) PublishAsync(e event.Event) error {
+func (k *producer) PublishAsync(e event.Event) error {
 	message, err := e.String()
 	if err != nil {
 		return err
@@ -131,7 +98,7 @@ func BuildSaramaConfig(config config.ProducerConfigs) (*sarama.Config, error) {
 	samaraConfig.Producer.Return.Successes = true
 	samaraConfig.Producer.Return.Errors = true
 	samaraConfig.Producer.Flush.Frequency = 1 * time.Second
-	//samaraConfig.Producer.Retry.Max = config.MaxRetry
+	//samaraConfig.IProducer.Retry.Max = config.MaxRetry
 
 	if config.EnableTLS {
 		samaraConfig.Net.TLS.Enable = config.EnableTLS

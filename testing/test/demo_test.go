@@ -5,7 +5,6 @@ import (
 	"demo_test_worker/mod/testing"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/suite"
-	"go.uber.org/zap"
 	testing2 "testing"
 	"time"
 )
@@ -28,8 +27,7 @@ func (s *DemoHandlerTest) TestDemoHandler_ShouldReturnSuccess() {
 		},
 	}
 
-	zap.L().Info("Event published", zap.Any("event", event))
-	err := s.Producer.PublishAsync(&event)
-	time.Sleep(10 * time.Second)
-	zap.L().Error("Error", zap.Error(err))
+	s.Producer.PublishAsync(&event)
+	time.Sleep(5 * time.Second)
+
 }
