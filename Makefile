@@ -4,6 +4,7 @@ compose:
 test:
 	go test -coverprofile=coverage.out -coverpkg=./... ./...
 
-coverage:
-	make test
+coverage: test
 	go tool cover -html=coverage.out -o coverage.html
+
+.PHONY: compose test coverage
